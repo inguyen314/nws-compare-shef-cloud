@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Setup url parameters -->
+<script>
+    // Create a URL object with the current page URL
+    const urlParams = new URLSearchParams(window.location.search);
+
+    var office = urlParams.get('office') || 'MVS';
+    console.log('office: ', office);
+
+    // Calculate the document root
+    const documentRoot = window.location.protocol + "//" + window.location.host + "/";
+
+    // Determine the default value of cda based on documentRoot
+    const cdaDefault = (documentRoot === `https://wm.${office.toLocaleLowerCase()}.ds.usace.army.mil/`) ? "internal" : "public";
+    // console.log("cdaDefault: ", cdaDefault);
+
+    // Get the value of a specific parameter
+    var cda = urlParams.get('cda') || cdaDefault;
+    console.log('cda: ', cda);
+
+    var type = urlParams.get('type') || null;
+    console.log('type: ', type);
+
+    var type_flow = urlParams.get('type_flow');
+    console.log('type_flow: ', type_flow);
+
+    var basin = urlParams.get('basin') || null;
+    console.log('basin: ', basin);
+
+    var gage = urlParams.get('gage') || null;
+    console.log('gage: ', gage);
+
+    var gage_2 = urlParams.get('gage_2') || null;
+    console.log('gage_2: ', gage_2);
+
+    var begin = urlParams.get('begin') || null;
+    console.log('begin: ', begin);
+
+    var end = urlParams.get('end') || null;
+    console.log('end: ', end);
+
+    var begin_2 = urlParams.get('begin_2') || null;
+    console.log('begin_2: ', begin_2);
+
+    var end_2 = urlParams.get('end_2') || null;
+    console.log('end_2: ', end_2);
+
+    var top10 = urlParams.get('top10') || null;
+    console.log('top10: ', top10);
+
+    var version_id = urlParams.get('version_id') || null;
+    console.log('version_id: ', version_id);
+
+    var template_id = urlParams.get('template_id') || null;
+    console.log('template_id: ', template_id);
+</script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shef</title>
+    <meta name="Description" content="U.S. Army Corps of Engineers St. Louis District Home Page" />
+    <link rel="stylesheet" href="css/body.css" />
+    <link rel="stylesheet" href="css/breadcrumbs.css" />
+    <link rel="stylesheet" href="css/jumpMenu.css" />
+    <link rel="stylesheet" href="css/sidebar.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script type="text/javascript" src="js/main.js"></script>
+    <!-- Add sidebar.css IF NOT LOAD SIDEBAR TEMPLATE -->
+    <link rel="stylesheet" href="css/sidebar.css" />
+    <!-- Include Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <!-- Include the Chart.js library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Include the Moment.js adapter for Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+</head>
+
+<body>
+    <div id="page-container">
+        <header id="header">
+            <!--Header content populated here by JavaScript Tag at end of body -->
+        </header>
+        <div class="page-wrap">
+            <div class="container-fluid">
+                <div id="breadcrumbs">
+                </div>
+                <div class="page-content">
+                    <sidebar id="sidebar"></sidebar>
+                    <div id="topPane" class="col-md backend-cp-collapsible">
+                        <div class="box-usace">
+                            <h2 class="box-header-striped">
+                                <span class="titleLabel title">MVS vs NWS Forecast</span>
+                                <span class="rss"></span>
+                            </h2>
+                            <div class="box-content" style="background-color:white;margin:auto">
+                                <div class="content">
+                                    <div id="loading_shef" style="display: none;"><img
+                                            src="https://wm.mvs.ds.usace.army.mil/apps/alarms/images/loading4.gif"
+                                            style='height: 50px; width: 50px;' alt="Loading..." /></div>
+                                    <div id="table_container_shef"></div>
+                                    <script src='https://wm.mvs.ds.usace.army.mil/apps/shef/shef.js'></script>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button id="returnTop" title="Return to Top of Page">Top</button>
+        </div>
+    </div>
+    <footer id="footer">
+        <!--Footer content populated here by script tag at end of body -->
+    </footer>
+    <script src="js/libraries/jQuery-3.3.6.min.js"></script>
+    <script defer>
+        // When the document has loaded pull in the page header and footer skins
+        $(document).ready(function () {
+            $('#header').load('templates/DISTRICT.header.html');
+            $('#footer').load('templates/DISTRICT.footer.html');
+        })
+    </script>
+</body>
+
+</html>
