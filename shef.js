@@ -31,6 +31,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     const currentDateTimeMinus30Hours = subtractHoursFromDate(currentDateTime, 23);
     // console.log('currentDateTimeMinus30Hours :', currentDateTimeMinus30Hours);
 
+    // Subtract thirty hours from current date and time
+    const currentDateTimeMinus00Hours = subtractHoursFromDate(currentDateTime, 24);
+    // console.log('currentDateTimeMinus30Hours :', currentDateTimeMinus30Hours);
+
     const currentDateTimePlus168Hours = addHoursFromDate(currentDateTime, 190);
     // const currentDateTimePlus168Hours = subtractHoursFromDate(currentDateTime, 23);
     // console.log('currentDateTimeMinus30Hours :', currentDateTimeMinus30Hours);
@@ -199,9 +203,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const nwsTsid = locData[`tsid-netmiss`][`assigned-time-series`][2][`timeseries-id`];
 
                         // Example API calls for additional data (customize these URLs)
-                        const stageApiUrl = setBaseUrl + `timeseries?name=${stageTsid}&begin=${currentDateTimeMinus30Hours.toISOString()}&end=${currentDateTime.toISOString()}&office=${office}`;
-                        const netmissApiUrl = setBaseUrl + `timeseries?name=${netmissTsid}&begin=${currentDateTime.toISOString()}&end=${currentDateTimePlus168Hours.toISOString()}&office=${office}`;
-                        const nwsApiUrl = setBaseUrl + `timeseries?name=${nwsTsid}&begin=${currentDateTime.toISOString()}&end=${currentDateTimePlus168Hours.toISOString()}&office=${office}`;
+                        const stageApiUrl = setBaseUrl + `timeseries?name=${stageTsid}&begin=${currentDateTimeMinus30Hours.toISOString()}&end=${currentDateTimeMinus00Hours.toISOString()}&office=${office}`;
+                        const netmissApiUrl = setBaseUrl + `timeseries?name=${netmissTsid}&begin=${currentDateTimeMinus00Hours.toISOString()}&end=${currentDateTimePlus168Hours.toISOString()}&office=${office}`;
+                        const nwsApiUrl = setBaseUrl + `timeseries?name=${nwsTsid}&begin=${currentDateTimeMinus00Hours.toISOString()}&end=${currentDateTimePlus168Hours.toISOString()}&office=${office}`;
 
                         // Fetch additional data
                         additionalPromises.push(
@@ -523,7 +527,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 // Add a row with the location ID as a section header
                 const locationRow = document.createElement('tr');
                 const locationCell = document.createElement('td');
-                locationCell.textContent = `Location: ${location['location-id']}`;
+                locationCell.textContent = `${location['location-id']}`;
                 locationCell.colSpan = 3; // Span across all columns
                 locationCell.style.backgroundColor = 'lightgray';
                 locationCell.style.fontWeight = 'bold';
