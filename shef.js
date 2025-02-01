@@ -391,8 +391,6 @@ document.addEventListener('DOMContentLoaded', async function () {
         };
     };
 
-
-
     function getValidValue(values) {
         // Get the first non-null value from the values array
         const validValue = values.find(valueEntry => valueEntry.value !== null);
@@ -564,5 +562,4 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         return table;
     }
-
 });
