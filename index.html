@@ -2,22 +2,31 @@
 <html lang="en">
 <!-- Setup url parameters -->
 <script>
-    // Create a URL object with the current page URL
     const urlParams = new URLSearchParams(window.location.search);
 
     var office = urlParams.get('office') || 'MVS';
     console.log('office: ', office);
 
-    // Calculate the document root
-    const documentRoot = window.location.protocol + "//" + window.location.host + "/";
-
-    // Determine the default value of cda based on documentRoot
-    const cdaDefault = (documentRoot === `https://wm.${office.toLocaleLowerCase()}.ds.usace.army.mil/`) ? "internal" : "public";
-    // console.log("cdaDefault: ", cdaDefault);
-
-    // Get the value of a specific parameter
-    var cda = urlParams.get('cda') || cdaDefault;
+    var cda = urlParams.get('cda');
     console.log('cda: ', cda);
+
+    const documentRoot = window.location.protocol + "//" + window.location.host + "/";
+    console.log("documentRoot: ", documentRoot);
+
+    let cdaDefault = null;
+    if (documentRoot === `https://wm.${office.toLocaleLowerCase()}.ds.usace.army.mil/` || `http://localhost:5173/` || `https://wm.rsgis.dev/` || `https://wm-${office.toLocaleLowerCase()}coop.mvk.ds.usace.army.mil/`) {
+        cdaDefault = "internal";
+    } else if (documentRoot === `https://wm-${office.toLocaleLowerCase()}coop.mvk.ds.usace.army.mil/`) {
+        cdaDefault = "internal-coop";
+    } else {
+        cdaDefault = "public";
+    }
+    console.log("cdaDefault: ", cdaDefault);
+
+    if (cda === null) {
+        cda = cdaDefault;
+    }
+    console.log("cda: ", cda);
 
     var type = urlParams.get('type') || null;
     console.log('type: ', type);
@@ -93,8 +102,7 @@
                             </h2>
                             <div class="box-content" style="background-color:white;margin:auto">
                                 <div class="content">
-                                    <div id="loading_shef" style="display: none;"><img
-                                            src="images/loading4.gif"
+                                    <div id="loading_shef" style="display: none;"><img src="images/loading4.gif"
                                             style='height: 50px; width: 50px;' alt="Loading..." /></div>
                                     <div id="table_container_shef"></div>
                                     <script src='js/shef.js'></script>
