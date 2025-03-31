@@ -7,14 +7,14 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     let setBaseUrl = null;
     if (cda === "internal") {
-        setBaseUrl = `https://wm.${office.toLowerCase()}.ds.usace.army.mil:8243/${office.toLowerCase()}-data/`;
+        setBaseUrl = `https://wm.${office.toLowerCase()}.ds.usace.army.mil/${office.toLowerCase()}-data/`;
         console.log("setBaseUrl: ", setBaseUrl);
     } else if (cda === "public") {
         setBaseUrl = `https://cwms-data.usace.army.mil/cwms-data/`;
         console.log("setBaseUrl: ", setBaseUrl);
     }
 
-    const apiUrl = setBaseUrl + `location/group?office=${office}&include-assigned=false&location-category-like=${setCategory}`;
+    const apiUrl = setBaseUrl + `location/group?office=${office}&group-office-id=${office}&category-office-id=${office}&category-id=${setCategory}`;
     // console.log("apiUrl: ", apiUrl);
 
     const netmissTsidMap = new Map();
@@ -372,139 +372,42 @@ document.addEventListener('DOMContentLoaded', async function () {
     };
 
     const extract6AMValues = (data) => {
-        // Define the target time (6:00 AM)
-        const targetTime = "06:00";
-
-        // Filter data.values to include only entries with 6:00 AM in the timestamp
-        const valuesAt6AM = data.values
-            .filter(entry => entry[0].includes(targetTime))
-            .slice(0, 7) // Limit to the first 7 items
-            .map(entry => ({
-                date: entry[0],
-                value: entry[1],
-                qualityCode: entry[2]
-            }));
-
+        const targetTimes = ["06:00", "07:00"];
+    
+        let valuesAt6AM = [];
+    
+        for (const targetTime of targetTimes) {
+            const filteredValues = data.values
+                .filter(entry => entry[0].includes(targetTime))
+                .map(entry => ({
+                    date: entry[0],
+                    value: entry[1],
+                    qualityCode: entry[2]
+                }));
+    
+            valuesAt6AM.push(...filteredValues);
+    
+            if (valuesAt6AM.length >= 7) break; // Stop once we have 7 entries
+        }
+    
         return {
             name: data.name,
-            valuesAt6AM
+            valuesAt6AM: valuesAt6AM.slice(0, 7)
         };
-    };
-
-    function getValidValue(values) {
-        // Get the first non-null value from the values array
-        const validValue = values.find(valueEntry => valueEntry.value !== null);
-        return validValue ? (validValue.value).toFixed(1) : 'N/A';
-    }
-
-    function createTableNetmissCheck(data) {
-        const table = document.createElement('table');
-        const thead = document.createElement('thead');
-        const tbody = document.createElement('tbody');
-
-        table.id = 'customers';
-
-        // Create table header
-        const headerRow = document.createElement('tr');
-        const headers = ['Location', 'Stage', 'Netmiss', 'NWS'];
-        headers.forEach(headerText => {
-            const th = document.createElement('th');
-            th.textContent = headerText;
-            // Apply styles
-            th.style.backgroundColor = 'darkblue';
-            th.style.color = 'white';
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
-
-        // Populate table rows
-        data.forEach(entry => {
-            entry['assigned-locations'].forEach(location => {
-                const row = document.createElement('tr');
-
-                const locationId = location["location-id"];
-                const stageValue = getValidValue(location.stageDataPreferredTimes[0].values);
-                const netmissValue = getValidValue(location.netmissDataPreferredTimes[0].values);
-                const nwsValue = getValidValue(location.nwsDataPreferredTimes[0].values);
-
-                const netmissValueDelta = (stageValue - netmissValue).toFixed(1);
-                const nwsValueDelta = (stageValue - nwsValue).toFixed(1);
-
-                // Create a link for stageValue
-                const stageLink = document.createElement('a');
-                stageLink.href = `https://wm.mvs.ds.usace.army.mil/apps/chart/index.html?office=MVS&cwms_ts_id=${location[`tsid-netmiss`][`assigned-time-series`][0][`timeseries-id`]}&cwms_ts_id_2=${location[`tsid-netmiss`][`assigned-time-series`][1][`timeseries-id`]}&lookforward=4`; // URL with location name
-                stageLink.textContent = stageValue; // Displayed text
-                stageLink.target = '_blank'; // Opens link in a new tab
-
-                // Set the inner HTML for the row
-                row.innerHTML = `
-                        <td>${locationId}</td>
-                        <td></td>
-                        <td>${netmissValue} (${netmissValueDelta})</td>
-                        <td>${nwsValue} (${nwsValueDelta})</td>
-                    `;
-
-                // Append the link to the second cell (stage column)
-                row.cells[1].appendChild(stageLink);
-
-                // Apply styles based on netmissValueDelta
-                if (Math.abs(netmissValueDelta) > 0.49) {
-                    row.cells[2].style.backgroundColor = "purple";
-                    row.cells[2].style.color = "lightgray";
-                } else if (netmissValueDelta >= 0.25) {
-                    row.cells[2].style.backgroundColor = "pink";
-                } else if (netmissValueDelta <= -0.25) {
-                    row.cells[2].style.backgroundColor = "DodgerBlue";
-                } else {
-                    row.cells[2].style.backgroundColor = "MediumSeaGreen";
-                }
-
-                // Apply styles based on nwsValueDelta
-                if (Math.abs(nwsValueDelta) > 0.49) {
-                    row.cells[3].style.backgroundColor = "purple";
-                    row.cells[3].style.color = "lightgray";
-                } else if (nwsValueDelta >= 0.25) {
-                    row.cells[3].style.backgroundColor = "pink";
-                } else if (nwsValueDelta <= -0.25) {
-                    row.cells[3].style.backgroundColor = "DodgerBlue";
-                } else {
-                    row.cells[3].style.backgroundColor = "MediumSeaGreen";
-                }
-
-                tbody.appendChild(row);
-            });
-        });
-
-        table.appendChild(tbody);
-
-        // Set widths for columns
-        const columnWidths = ['40%', '20%', '20%', '20%'];
-
-        // Set the width for header cells
-        Array.from(table.getElementsByTagName('th')).forEach((th, index) => {
-            th.style.width = columnWidths[index];
-        });
-
-        // Set the width for body cells
-        Array.from(table.getElementsByTagName('td')).forEach((td, index) => {
-            td.style.width = columnWidths[index % columnWidths.length]; // Use modulus to cycle through widths
-        });
-
-        return table;
-    }
+    };       
 
     function createTableForAllLocations(data) {
         const table = document.createElement('table');
         const thead = document.createElement('thead');
         const tbody = document.createElement('tbody');
-
+    
         table.id = 'all-locations-table';
         table.style.border = '1px solid black';
         table.style.width = '100%';
         table.style.marginBottom = '20px';
         table.style.borderCollapse = 'collapse';
-
+        table.style.tableLayout = 'fixed'; // Ensures equal column width
+    
         // Create a single header for all sections
         const headerRow = document.createElement('tr');
         const headers = ['Date/Time', 'Netmiss', 'NWS'];
@@ -514,11 +417,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             th.style.backgroundColor = 'darkblue';
             th.style.color = 'white';
             th.style.border = '1px solid black';
+            th.style.width = '33.33%'; // Ensure equal width
+            th.style.textAlign = 'center';
             headerRow.appendChild(th);
         });
         thead.appendChild(headerRow);
         table.appendChild(thead);
-
+    
         // Populate the table rows for all locations
         data.forEach(entry => {
             entry['assigned-locations'].forEach(location => {
@@ -533,33 +438,33 @@ document.addEventListener('DOMContentLoaded', async function () {
                 locationCell.style.border = '1px solid black';
                 locationRow.appendChild(locationCell);
                 tbody.appendChild(locationRow);
-
+    
                 // Get data for the location
                 const netmissData = location.netmissDataPreferredTimes?.valuesAt6AM || [];
                 const nwsData = location.nwsDataPreferredTimes?.valuesAt6AM || [];
-
+    
                 // Add rows for the data
                 const rowCount = Math.max(netmissData.length, nwsData.length); // Handle cases where data arrays have different lengths
                 for (let i = 0; i < rowCount; i++) {
                     const row = document.createElement('tr');
-
+    
                     // Access the date and value from the netmissData and nwsData arrays directly
                     const dateTime = netmissData[i]?.date || 'N/A'; // Default to 'N/A' if null/undefined
                     const netmissValue = netmissData[i]?.value != null ? netmissData[i].value.toFixed(2) : 'N/A'; // Handle null/undefined gracefully
                     const nwsValue = nwsData[i]?.value != null ? nwsData[i].value.toFixed(2) : 'N/A'; // Handle null/undefined gracefully
-
+    
                     row.innerHTML = `
-                        <td style="border: 1px solid black; text-align: center;">${dateTime}</td>
-                        <td style="border: 1px solid black; text-align: center;">${netmissValue}</td>
-                        <td style="border: 1px solid black; text-align: center;">${nwsValue}</td>
+                        <td style="border: 1px solid black; text-align: center; width: 33.33%;">${dateTime}</td>
+                        <td style="border: 1px solid black; text-align: center; width: 33.33%;">${netmissValue}</td>
+                        <td style="border: 1px solid black; text-align: center; width: 33.33%;">${nwsValue}</td>
                     `;
                     tbody.appendChild(row);
                 }
             });
         });
-
+    
         table.appendChild(tbody);
-
+    
         return table;
-    }
+    }    
 });
